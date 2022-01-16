@@ -26,7 +26,26 @@ type Letter struct {
 	Color         string `json:"color`
 }
 
+func CountExistingLetters(letters []Letter, letter string) int {
+	count := 0
+	for _, n := range letters {
+		if n.Letter == letter {
+			count++
+		}
+	}
+	return count
+}
 
+func CountExactMatches(word string, guess_word string, letter string) int {
+	count := 0
+	for i, n := range word {
+		l := string(n)
+		if  letter == l && l == string(guess_word[i]) {
+			count++
+		}
+	}
+	return count
+}
 
 func main() {
 	file, err := os.Open("./words_5.txt")
@@ -69,18 +88,25 @@ func main() {
 		word_guess := c.Param("word")
 		letters := make([]Letter, 0)
 		for i, r := range word_guess {
-			index := strings.Index(word, string(r))
+			letter := string(r)
+			index := strings.Index(word, letter)
 			color := "Grey"
-			if index == i {
+			// Do green first, then rest
+			if letter == string(word[i]) {
+				// Target word has the same letter in the same position
 				color = "Green"
-			} else if index > 0 {
+			} else if index > -1 &&
+				// Target word has more of the same letter than what has already been found
+				strings.Count(word, letter) > CountExistingLetters(letters, letter) &&
+				// Guess word has more of letter than there are exat matches
+				strings.Count(word_guess, letter) > CountExactMatches(word, word_guess, letter) {
 				color = "Yellow"
 			} else {
 				color = "Grey"
 			}
 			letters = append(letters, Letter{
 				Color: color,
-				Letter: string(r),
+				Letter: letter,
 			})
 		}
 		c.JSON(200, letters)
