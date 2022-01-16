@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	C "./check_error"
+	C "github.com/anna-osipova/go-wordle/check_error"
 	"github.com/gin-gonic/gin"
 )
 

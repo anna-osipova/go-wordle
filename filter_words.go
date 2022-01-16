@@ -5,7 +5,7 @@ import (
 	"log"
 	"os"
 
-	C "./check_error"
+	C "github.com/anna-osipova/go-wordle/check_error"
 )
 
 func filter_words() {

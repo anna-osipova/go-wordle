@@ -1,4 +1,4 @@
-module go-wordle
+module github.com/anna-osipova/go-wordle
 
 go 1.17
 
