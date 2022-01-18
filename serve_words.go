@@ -9,6 +9,7 @@ import (
 	"time"
 
 	C "github.com/anna-osipova/go-wordle/check_error"
+	Hint "github.com/anna-osipova/go-wordle/hint"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,12 +25,6 @@ type WordResponse struct {
 type Letter struct {
 	Letter        string `json:"letter`
 	Color         string `json:"color`
-}
-
-type WordHelp struct {
-	Include string `json:"include" binding:"required"`
-	Exclude string `json:"exclude" binding:"required"`
-	Template string `json:"template" binding:"required"`
 }
 
 func CountExistingLetters(letters []Letter, letter string) int {
@@ -53,32 +48,7 @@ func CountExactMatches(word string, guess_word string, letter string) int {
 	return count
 }
 
-func IsMatch(word_help *WordHelp, word string) bool {
-	// word contains letters from "include"
-	for _, n := range word_help.Include {
-		if strings.Index(word, string(n)) < 0 {
-			return false
-		}
-	}
-	// word doesn't contain letters from "exclude"
-	for _, n := range word_help.Exclude {
-		if strings.Index(word, string(n)) > -1 {
-			return false
-		}
-	}
-	// word matches "template"
-	if word_help.Template != "" {
-		for i, n := range word_help.Template {
-			letter := string(n)
-			if letter != "_" && string(word[i]) != letter {
-				return false
-			}
-		}
-	}
-	return true
-}
-
-func main() {
+func WordsMiddleware(c *gin.Context) {
 	file, err := os.Open("./words_5.txt")
 	C.Check(err)
 	defer file.Close()
@@ -90,32 +60,44 @@ func main() {
 		word := scanner.Text()
 		words = append(words, word)
 	}
-	log.Println("Finished reading")
-	words_count := len(words)
+	log.Println("Finished reading:", len(words))
+	c.Set("word_list", words)
+}
 
-	r := gin.Default()
+func GetRandomWord(words []string) string {
+	words_count := len(words)
 
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
+	return words[random.Intn(words_count)]
+}
 
-	word := words[random.Intn(words_count)]
+func main() {
+	r := gin.Default()
+
+	r.Use(WordsMiddleware)
 
 	r.GET("/words", func(c *gin.Context) {
+		words := c.MustGet("word_list").([]string)
 		words_response := WordsResponse{
-			Count: words_count,
+			Count: len(words),
 			Words: words,
 		}
 		c.JSON(200, words_response)
 	})
 
 	r.GET("/words/random", func(c *gin.Context) {
+		words := c.MustGet("word_list").([]string)
+
 		word_response := WordResponse{
-			Word: words[random.Intn(words_count)],
+			Word: GetRandomWord(words),
 		}
 		c.JSON(200, word_response)
 	})
 
 	r.GET("/words/:word", func(c *gin.Context) {
+		words := c.MustGet("word_list").([]string)
+		word := GetRandomWord(words)
 		word_guess := c.Param("word")
 		letters := make([]Letter, 0)
 		for i, r := range word_guess {
@@ -143,19 +125,8 @@ func main() {
 		c.JSON(200, letters)
 	})
 
-	r.POST("/words/hint", func(c *gin.Context) {
-		var word_help WordHelp
-		c.BindJSON(&word_help)
-
-		var matching_words []string
-		for _, word := range words {
-
-			if IsMatch(&word_help, word) == true {
-				matching_words = append(matching_words, word)
-			}
-		}
-
-		c.JSON(200, gin.H{ "matches": matching_words })
-	})
+	hint_group := r.Group("/hint")
+	hint_group.Use(WordsMiddleware)
+	Hint.HintRegister(hint_group)
 	r.Run()
 }
