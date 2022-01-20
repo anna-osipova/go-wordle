@@ -17,19 +17,20 @@ type newGamePayload struct {
 func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		tokenString := c.Query("token")
-		token, err := jwtService.ValidateToken(tokenString)
+		token, err := jwt.ParseWithClaims(tokenString, &service.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
+			return []byte(jwtService.GetSecretKey()), nil
+		})
 		if err != nil {
 			c.AbortWithStatus(http.StatusBadRequest)
 		}
 		if token.Valid {
-			claims := token.Claims.(jwt.MapClaims)
-			c.Set("secret_word", claims["word"])
-			c.Set("attempts", int(claims["attempts"].(float64)))
+			claims := token.Claims.(*service.CustomClaims)
+			c.Set("secret_word", claims.Word)
+			c.Set("attempts", int(claims.Attempts))
 		} else {
 			fmt.Println(err)
 			c.AbortWithStatus(http.StatusUnauthorized)
 		}
-
 	}
 }
 

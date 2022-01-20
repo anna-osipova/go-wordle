@@ -12,8 +12,9 @@ import (
 type JWTService interface {
 	GenerateToken(word string, attempts int) string
 	ValidateToken(token string) (*jwt.Token, error)
+	GetSecretKey() string
 }
-type authCustomClaims struct {
+type CustomClaims struct {
 	Word     string `json:"word"`
 	Attempts int    `json:"attempts"`
 	jwt.StandardClaims
@@ -39,8 +40,12 @@ func getSecretKey() string {
 	return secret
 }
 
+func (service *jwtServices) GetSecretKey() string {
+	return service.secretKey
+}
+
 func (service *jwtServices) GenerateToken(word string, attempts int) string {
-	claims := &authCustomClaims{
+	claims := &CustomClaims{
 		word,
 		attempts,
 		jwt.StandardClaims{
