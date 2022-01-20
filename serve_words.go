@@ -133,5 +133,5 @@ func main() {
 	letters_group := r.Group("/letters")
 	letters_group.Use(WordsMiddleware)
 	Letters.LettersRegister(letters_group)
-	r.Run()
+	r.Run("localhost:8080")
 }
