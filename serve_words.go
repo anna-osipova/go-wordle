@@ -5,10 +5,10 @@ import (
 	"log"
 	"math/rand"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/anna-osipova/go-wordle/errorcheck"
+	"github.com/anna-osipova/go-wordle/game"
 	"github.com/anna-osipova/go-wordle/hint"
 	"github.com/anna-osipova/go-wordle/letters"
 	"github.com/gin-gonic/gin"
@@ -21,32 +21,6 @@ type WordsResponse struct {
 
 type WordResponse struct {
 	Word string `json:"word"`
-}
-
-type Letter struct {
-	Letter string `json:"letter`
-	Color  string `json:"color`
-}
-
-func CountExistingLetters(letters []Letter, letter string) int {
-	count := 0
-	for _, n := range letters {
-		if n.Letter == letter {
-			count++
-		}
-	}
-	return count
-}
-
-func CountExactMatches(word string, guess_word string, letter string) int {
-	count := 0
-	for i, n := range word {
-		l := string(n)
-		if letter == l && l == string(guess_word[i]) {
-			count++
-		}
-	}
-	return count
 }
 
 func WordsMiddleware(c *gin.Context) {
@@ -94,36 +68,6 @@ func main() {
 			Word: GetRandomWord(words),
 		}
 		c.JSON(200, word_response)
-	})
-
-	r.GET("/words/:word", func(c *gin.Context) {
-		words := c.MustGet("word_list").([]string)
-		word := GetRandomWord(words)
-		word_guess := c.Param("word")
-		letters := make([]Letter, 0)
-		for i, r := range word_guess {
-			letter := string(r)
-			index := strings.Index(word, letter)
-			color := "Grey"
-			// Do green first, then rest
-			if letter == string(word[i]) {
-				// Target word has the same letter in the same position
-				color = "Green"
-			} else if index > -1 &&
-				// Target word has more of the same letter than what has already been found
-				strings.Count(word, letter) > CountExistingLetters(letters, letter) &&
-				// Guess word has more of letter than there are exat matches
-				strings.Count(word_guess, letter) > CountExactMatches(word, word_guess, letter) {
-				color = "Yellow"
-			} else {
-				color = "Grey"
-			}
-			letters = append(letters, Letter{
-				Color:  color,
-				Letter: letter,
-			})
-		}
-		c.JSON(200, letters)
 	})
 
 	v1 := r.Group("/api")
