@@ -1,19 +1,29 @@
 package hint
 
 import (
+	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gin-gonic/gin/binding"
+	"github.com/go-playground/validator/v10"
 )
 
 func HintRegister(router *gin.RouterGroup) {
+	if v, ok := binding.Validator.Engine().(*validator.Validate); ok {
+		v.RegisterValidation("maxfiveletters", maxFiveLetters)
+	}
 	router.POST("/", HintFind)
 }
 
+var maxFiveLetters validator.Func = func(fl validator.FieldLevel) bool {
+	return len(fl.Field().String()) <= 5
+}
+
 type WordHelp struct {
-	Include  string `json:"include" binding:"required"`
+	Include  string `json:"include" binding:"required,maxfiveletters"`
 	Exclude  string `json:"exclude" binding:"required"`
-	Template string `json:"template" binding:"required"`
+	Template string `json:"template" binding:"required,len=5"`
 }
 
 func IsMatch(word_help *WordHelp, word string) bool {
@@ -43,7 +53,10 @@ func IsMatch(word_help *WordHelp, word string) bool {
 
 func HintFind(c *gin.Context) {
 	var word_help WordHelp
-	c.BindJSON(&word_help)
+	if err := c.ShouldBindJSON(&word_help); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
 	words := c.MustGet("word_list").([]string)
 	var matching_words []string
@@ -53,5 +66,5 @@ func HintFind(c *gin.Context) {
 		}
 	}
 
-	c.JSON(200, gin.H{"matches": matching_words})
+	c.JSON(http.StatusOK, gin.H{"matches": matching_words})
 }
