@@ -9,6 +9,15 @@ type Letter struct {
 	Color  string `json:"color`
 }
 
+func CheckWordExists(words []string, word string) bool {
+	for _, w := range words {
+		if w == word {
+			return true
+		}
+	}
+	return false
+}
+
 func CountExistingLetters(letters []Letter, letter string) int {
 	count := 0
 	for _, n := range letters {

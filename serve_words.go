@@ -78,5 +78,8 @@ func main() {
 
 	letters_group := v1.Group("/letters")
 	letters.LettersRegister(letters_group)
+
+	gameGroup := v1.Group("/game")
+	game.GameRegister(gameGroup)
 	r.Run("localhost:8080")
 }
