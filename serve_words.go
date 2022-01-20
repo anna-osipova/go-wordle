@@ -15,17 +15,17 @@ import (
 )
 
 type WordsResponse struct {
-	Count         int `json:"count"`
-	Words         []string `json:"words"`
+	Count int      `json:"count"`
+	Words []string `json:"words"`
 }
 
 type WordResponse struct {
-	Word          string `json:"word"`
+	Word string `json:"word"`
 }
 
 type Letter struct {
-	Letter        string `json:"letter`
-	Color         string `json:"color`
+	Letter string `json:"letter`
+	Color  string `json:"color`
 }
 
 func CountExistingLetters(letters []Letter, letter string) int {
@@ -42,7 +42,7 @@ func CountExactMatches(word string, guess_word string, letter string) int {
 	count := 0
 	for i, n := range word {
 		l := string(n)
-		if  letter == l && l == string(guess_word[i]) {
+		if letter == l && l == string(guess_word[i]) {
 			count++
 		}
 	}
@@ -119,7 +119,7 @@ func main() {
 				color = "Grey"
 			}
 			letters = append(letters, Letter{
-				Color: color,
+				Color:  color,
 				Letter: letter,
 			})
 		}

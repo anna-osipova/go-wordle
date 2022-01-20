@@ -11,8 +11,8 @@ func HintRegister(router *gin.RouterGroup) {
 }
 
 type WordHelp struct {
-	Include string `json:"include" binding:"required"`
-	Exclude string `json:"exclude" binding:"required"`
+	Include  string `json:"include" binding:"required"`
+	Exclude  string `json:"exclude" binding:"required"`
 	Template string `json:"template" binding:"required"`
 }
 
@@ -53,5 +53,5 @@ func HintFind(c *gin.Context) {
 		}
 	}
 
-	c.JSON(200, gin.H{ "matches": matching_words })
+	c.JSON(200, gin.H{"matches": matching_words})
 }

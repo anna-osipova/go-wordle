@@ -31,6 +31,6 @@ func filter_words() {
 	writer.Flush()
 
 	if err := scanner.Err(); err != nil {
-			log.Fatal(err)
+		log.Fatal(err)
 	}
 }
