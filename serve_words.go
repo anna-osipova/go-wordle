@@ -8,9 +8,9 @@ import (
 	"strings"
 	"time"
 
-	C "github.com/anna-osipova/go-wordle/check_error"
-	Hint "github.com/anna-osipova/go-wordle/hint"
-	Letters "github.com/anna-osipova/go-wordle/letters"
+	"github.com/anna-osipova/go-wordle/errorcheck"
+	"github.com/anna-osipova/go-wordle/hint"
+	"github.com/anna-osipova/go-wordle/letters"
 	"github.com/gin-gonic/gin"
 )
 
@@ -51,7 +51,7 @@ func CountExactMatches(word string, guess_word string, letter string) int {
 
 func WordsMiddleware(c *gin.Context) {
 	file, err := os.Open("./words_5.txt")
-	C.Check(err)
+	errorcheck.Check(err)
 	defer file.Close()
 
 	var words []string
@@ -130,9 +130,9 @@ func main() {
 	v1.Use(WordsMiddleware)
 
 	hint_group := v1.Group("/hint")
-	Hint.HintRegister(hint_group)
+	hint.HintRegister(hint_group)
 
 	letters_group := v1.Group("/letters")
-	Letters.LettersRegister(letters_group)
+	letters.LettersRegister(letters_group)
 	r.Run("localhost:8080")
 }

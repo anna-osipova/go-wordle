@@ -5,16 +5,16 @@ import (
 	"log"
 	"os"
 
-	C "github.com/anna-osipova/go-wordle/check_error"
+	"github.com/anna-osipova/go-wordle/errorcheck"
 )
 
 func filter_words() {
 	file, err := os.Open("./words.txt")
-	C.Check(err)
+	errorcheck.Check(err)
 	defer file.Close()
 
 	write_file, err := os.Create("./words_5.txt")
-	C.Check(err)
+	errorcheck.Check(err)
 	defer write_file.Close()
 	writer := bufio.NewWriter(write_file)
 
@@ -24,7 +24,7 @@ func filter_words() {
 		word := scanner.Text()
 		if len(word) == 5 {
 			_, err := writer.WriteString(word + "\n")
-			C.Check(err)
+			errorcheck.Check(err)
 		}
 	}
 

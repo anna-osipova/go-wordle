@@ -1,7 +1,7 @@
-package check_error
+package errorcheck
 
 func Check(e error) {
 	if e != nil {
-			panic(e)
+		panic(e)
 	}
 }
