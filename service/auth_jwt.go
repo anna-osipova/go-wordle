@@ -10,11 +10,12 @@ import (
 
 //jwt service
 type JWTService interface {
-	GenerateToken(word string) string
+	GenerateToken(word string, attempts int) string
 	ValidateToken(token string) (*jwt.Token, error)
 }
 type authCustomClaims struct {
-	Word string `json:"word"`
+	Word     string `json:"word"`
+	Attempts int    `json:"attempts"`
 	jwt.StandardClaims
 }
 
@@ -38,9 +39,10 @@ func getSecretKey() string {
 	return secret
 }
 
-func (service *jwtServices) GenerateToken(word string) string {
+func (service *jwtServices) GenerateToken(word string, attempts int) string {
 	claims := &authCustomClaims{
 		word,
+		attempts,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    service.issure,
