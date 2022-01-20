@@ -10,6 +10,7 @@ import (
 
 	C "github.com/anna-osipova/go-wordle/check_error"
 	Hint "github.com/anna-osipova/go-wordle/hint"
+	Letters "github.com/anna-osipova/go-wordle/letters"
 	"github.com/gin-gonic/gin"
 )
 
@@ -128,5 +129,9 @@ func main() {
 	hint_group := r.Group("/hint")
 	hint_group.Use(WordsMiddleware)
 	Hint.HintRegister(hint_group)
+
+	letters_group := r.Group("/letters")
+	letters_group.Use(WordsMiddleware)
+	Letters.LettersRegister(letters_group)
 	r.Run()
 }
