@@ -126,12 +126,13 @@ func main() {
 		c.JSON(200, letters)
 	})
 
-	hint_group := r.Group("/hint")
-	hint_group.Use(WordsMiddleware)
+	v1 := r.Group("/api")
+	v1.Use(WordsMiddleware)
+
+	hint_group := v1.Group("/hint")
 	Hint.HintRegister(hint_group)
 
-	letters_group := r.Group("/letters")
-	letters_group.Use(WordsMiddleware)
+	letters_group := v1.Group("/letters")
 	Letters.LettersRegister(letters_group)
 	r.Run("localhost:8080")
 }
