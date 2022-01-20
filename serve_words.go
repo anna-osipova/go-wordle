@@ -40,11 +40,11 @@ func WordsMiddleware(c *gin.Context) {
 }
 
 func GetRandomWord(words []string) string {
-	words_count := len(words)
+	wordsCount := len(words)
 
 	source := rand.NewSource(time.Now().UnixNano())
 	random := rand.New(source)
-	return words[random.Intn(words_count)]
+	return words[random.Intn(wordsCount)]
 }
 
 func main() {
@@ -54,30 +54,30 @@ func main() {
 
 	r.GET("/words", func(c *gin.Context) {
 		words := c.MustGet("word_list").([]string)
-		words_response := WordsResponse{
+		wordsResponse := WordsResponse{
 			Count: len(words),
 			Words: words,
 		}
-		c.JSON(200, words_response)
+		c.JSON(200, wordsResponse)
 	})
 
 	r.GET("/words/random", func(c *gin.Context) {
 		words := c.MustGet("word_list").([]string)
 
-		word_response := WordResponse{
+		wordResponse := WordResponse{
 			Word: GetRandomWord(words),
 		}
-		c.JSON(200, word_response)
+		c.JSON(200, wordResponse)
 	})
 
 	v1 := r.Group("/api")
 	v1.Use(WordsMiddleware)
 
-	hint_group := v1.Group("/hint")
-	hint.HintRegister(hint_group)
+	hintGroup := v1.Group("/hint")
+	hint.HintRegister(hintGroup)
 
-	letters_group := v1.Group("/letters")
-	letters.LettersRegister(letters_group)
+	lettersGroup := v1.Group("/letters")
+	letters.LettersRegister(lettersGroup)
 
 	gameGroup := v1.Group("/game")
 	game.GameRegister(gameGroup)
