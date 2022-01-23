@@ -17,11 +17,7 @@ export const LetterGrid = ({ attempts, input }: LetterGridProps) => {
         .map((_, row) => {
           if (attempts[row]) {
             return attempts[row].letters.map((letter, i) => (
-              <div
-                style={{ backgroundColor: letter.color }}
-                className={`cell cell-${row}-${i}`}
-                key={`${row}-${i}`}
-              >
+              <div className={`cell cell-${row}-${i} color-${letter.color}`} key={`${row}-${i}`}>
                 {letter.letter}
               </div>
             ));

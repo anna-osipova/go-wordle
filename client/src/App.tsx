@@ -8,9 +8,15 @@ import { makeGuessRequest } from './api';
 import { LetterGrid } from './components/LetterGrid';
 import { Attempt, WORD_LENGTH } from './types';
 
+type SimpleKeyboard = {
+  addButtonTheme: (buttons: string, classes: string) => void;
+  removeButtonTheme: (buttons: string, classes: string) => void;
+};
+
 function App() {
   const [input, setInput] = React.useState<string>('');
   const [attempts, setAttempts] = React.useState<Attempt[]>([]);
+  const keyboardRef = React.useRef<SimpleKeyboard | null>(null);
 
   const onKeyPress = async (key: string) => {
     if (key === '{bksp}' && input.length > 0) {
@@ -50,6 +56,9 @@ function App() {
         resetGame();
       } else {
         setAttempts([...attempts, { word, letters: data.letters }]);
+        data.letters.forEach((letter) => {
+          keyboardRef.current?.addButtonTheme(letter.letter, `color-${letter.color}`);
+        });
       }
     }
     return true;
@@ -58,12 +67,17 @@ function App() {
   const resetGame = () => {
     // TODO: show emoji stats
     setAttempts([]);
+    keyboardRef.current?.removeButtonTheme(
+      'q w e r t y u i o p a s d f g h j k l z x c v b n m',
+      'color-grey color-yellow color-green'
+    );
   };
 
   return (
     <div className="App">
       <LetterGrid attempts={attempts} input={input} />
       <Keyboard
+        keyboardRef={(ref: SimpleKeyboard) => (keyboardRef.current = ref)}
         onChange={() => {}}
         onKeyPress={onKeyPress}
         physicalKeyboardHighlight
