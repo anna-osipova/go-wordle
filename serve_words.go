@@ -11,6 +11,7 @@ import (
 	"github.com/anna-osipova/go-wordle/game"
 	"github.com/anna-osipova/go-wordle/hint"
 	"github.com/anna-osipova/go-wordle/letters"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -50,6 +51,9 @@ func GetRandomWord(words []string) string {
 func main() {
 	r := gin.Default()
 
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{"*"}
+	r.Use(cors.New(config))
 	r.Use(WordsMiddleware)
 
 	r.GET("/words", func(c *gin.Context) {
