@@ -41,6 +41,11 @@ func GameRegister(router *gin.RouterGroup) {
 	router.POST("/guess/:word", GameGuess(jwtService))
 }
 
+type GameGuessResponse struct {
+	Token   string         `json:"token"`
+	Letters []logic.Letter `json:"letters"`
+}
+
 func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		word := c.MustGet("secret_word").(string)
@@ -77,10 +82,12 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 
 		letters := logic.MakeGuess(wordGuess, word)
 		token := jwtService.GenerateToken(word, attempts+1)
-		c.JSON(200, gin.H{
-			"letters": letters,
-			"token":   token,
-		})
+
+		gameGuessResponse := GameGuessResponse{
+			Token:   token,
+			Letters: letters,
+		}
+		c.JSON(200, gameGuessResponse)
 	}
 }
 

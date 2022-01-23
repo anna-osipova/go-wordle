@@ -5,8 +5,8 @@ import (
 )
 
 type Letter struct {
-	Letter string `json:"letter`
-	Color  string `json:"color`
+	Letter string `json:"letter"`
+	Color  string `json:"color"`
 }
 
 func CheckWordExists(words []string, word string) bool {
@@ -44,19 +44,19 @@ func MakeGuess(wordGuess string, word string) []Letter {
 	for i, r := range wordGuess {
 		letter := string(r)
 		index := strings.Index(word, letter)
-		color := "Grey"
+		color := "grey"
 		// Do green first, then rest
 		if letter == string(word[i]) {
 			// Target word has the same letter in the same position
-			color = "Green"
+			color = "green"
 		} else if index > -1 &&
 			// Target word has more of the same letter than what has already been found
 			strings.Count(word, letter) > CountExistingLetters(letters, letter) &&
 			// Guess word has more of letter than there are exat matches
 			strings.Count(wordGuess, letter) > CountExactMatches(word, wordGuess, letter) {
-			color = "Yellow"
+			color = "yellow"
 		} else {
-			color = "Grey"
+			color = "grey"
 		}
 		letters = append(letters, Letter{
 			Color:  color,
