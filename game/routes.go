@@ -6,8 +6,8 @@ import (
 
 	"github.com/anna-osipova/go-wordle/logic"
 	"github.com/anna-osipova/go-wordle/service"
-	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
+	"github.com/golang-jwt/jwt"
 )
 
 type newGamePayload struct {
