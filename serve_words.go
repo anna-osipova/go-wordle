@@ -2,17 +2,20 @@ package main
 
 import (
 	"bufio"
+	"fmt"
 	"log"
 	"math/rand"
 	"os"
 	"time"
 
+	"github.com/anna-osipova/go-wordle/db"
 	"github.com/anna-osipova/go-wordle/errorcheck"
 	"github.com/anna-osipova/go-wordle/game"
 	"github.com/anna-osipova/go-wordle/hint"
 	"github.com/anna-osipova/go-wordle/letters"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 )
 
 type WordsResponse struct {
@@ -49,6 +52,14 @@ func GetRandomWord(words []string) string {
 }
 
 func main() {
+	godotenv.Load()
+
+	dbInstance, err := db.Initialize()
+	if err != nil {
+		panic(fmt.Sprintf("Could not set up database: %v", err))
+	}
+	defer dbInstance.Conn.Close()
+
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
