@@ -16,11 +16,14 @@ type newGamePayload struct {
 
 func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		tokenString := c.Query("token")
+		const BEARER_SCHEMA = "Bearer "
+		authHeader := c.GetHeader("Authorization")
+		tokenString := authHeader[len(BEARER_SCHEMA):]
 		token, err := jwt.ParseWithClaims(tokenString, &service.CustomClaims{}, func(token *jwt.Token) (interface{}, error) {
 			return []byte(jwtService.GetSecretKey()), nil
 		})
 		if err != nil {
+			fmt.Println(err)
 			c.AbortWithStatus(http.StatusBadRequest)
 		}
 		if token.Valid {
@@ -36,13 +39,14 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 
 func GameRegister(router *gin.RouterGroup) {
 	var jwtService service.JWTService = service.JWTAuthService()
-	router.POST("/new", GameStart(jwtService))
+	router.POST("/new", GameNew(jwtService))
+
 	router.Use(AuthorizeJWT(jwtService))
+	router.POST("/start", GameStart)
 	router.POST("/guess/:word", GameGuess(jwtService))
 }
 
 type GameGuessResponse struct {
-	Token   string         `json:"token"`
 	Letters []logic.Letter `json:"letters"`
 }
 
@@ -81,17 +85,15 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 		}
 
 		letters := logic.MakeGuess(wordGuess, word)
-		token := jwtService.GenerateToken(word, attempts+1)
 
 		gameGuessResponse := GameGuessResponse{
-			Token:   token,
 			Letters: letters,
 		}
 		c.JSON(200, gameGuessResponse)
 	}
 }
 
-func GameStart(jwtService service.JWTService) gin.HandlerFunc {
+func GameNew(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var newGame newGamePayload
 		if err := c.ShouldBindJSON(&newGame); err != nil {
@@ -101,4 +103,8 @@ func GameStart(jwtService service.JWTService) gin.HandlerFunc {
 		token := jwtService.GenerateToken(newGame.Word, 0)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 	}
+}
+
+func GameStart(c *gin.Context) {
+	c.Status(http.StatusOK)
 }

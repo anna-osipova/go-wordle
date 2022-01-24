@@ -52,8 +52,11 @@ func main() {
 	r := gin.Default()
 
 	config := cors.DefaultConfig()
-	config.AllowOrigins = []string{"*"}
+	config.AllowOrigins = []string{"http://localhost:3000"}
+	config.AllowCredentials = true
+	config.AllowHeaders = append(config.AllowHeaders, "Authorization")
 	r.Use(cors.New(config))
+
 	r.Use(WordsMiddleware)
 
 	r.GET("/words", func(c *gin.Context) {

@@ -4,7 +4,7 @@ import 'react-simple-keyboard/build/css/index.css';
 import * as React from 'react';
 import Keyboard from 'react-simple-keyboard';
 
-import { makeGuessRequest } from './api';
+import { makeGuessRequest, makeStartRequest } from './api';
 import { LetterGrid } from './components/LetterGrid';
 import { Attempt, WORD_LENGTH } from './types';
 
@@ -17,6 +17,10 @@ function App() {
   const [input, setInput] = React.useState<string>('');
   const [attempts, setAttempts] = React.useState<Attempt[]>([]);
   const keyboardRef = React.useRef<SimpleKeyboard | null>(null);
+
+  React.useEffect(() => {
+    makeStartRequest();
+  }, []);
 
   const onKeyPress = async (key: string) => {
     if (key === '{bksp}' && input.length > 0) {
@@ -83,11 +87,7 @@ function App() {
         physicalKeyboardHighlight
         physicalKeyboardHighlightPress
         layout={{
-          default: [
-            'q w e r t y u i o p',
-            'a s d f g h j k l',
-            '{enter} z x c v b n m {bksp} {delete}'
-          ]
+          default: ['q w e r t y u i o p', 'a s d f g h j k l', '{enter} z x c v b n m {bksp}']
         }}
       />
     </div>
