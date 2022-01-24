@@ -1,7 +1,7 @@
 package models
 
 type Session struct {
-	ID        int    `json:"id"`
+	ID        string `json:"id"`
 	Word      string `json:"word"`
 	Attempts  int    `json:"attempts"`
 	CreatedAt string `json:"created_at"`

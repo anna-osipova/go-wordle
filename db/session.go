@@ -7,7 +7,7 @@ import (
 )
 
 func (db Database) CreateSession(session *models.Session) error {
-	var id int
+	var id string
 	var createdAt string
 	query := `INSERT INTO sessions (word) VALUES ($1) RETURNING id, created_at`
 	err := db.Conn.QueryRow(query, session.Word).Scan(&id, &createdAt)
@@ -18,11 +18,11 @@ func (db Database) CreateSession(session *models.Session) error {
 	session.CreatedAt = createdAt
 	return nil
 }
-func (db Database) GetSessionById(sessionId int) (models.Session, error) {
+func (db Database) GetSessionById(sessionId string) (models.Session, error) {
 	session := models.Session{}
 	query := `SELECT * FROM sessions WHERE id = $1;`
 	row := db.Conn.QueryRow(query, sessionId)
-	switch err := row.Scan(&session.ID, &session.Word, &session.CreatedAt); err {
+	switch err := row.Scan(&session.ID, &session.Word, &session.Attempts, &session.CreatedAt); err {
 	case sql.ErrNoRows:
 		return session, ErrNoMatch
 	default:
@@ -30,10 +30,10 @@ func (db Database) GetSessionById(sessionId int) (models.Session, error) {
 	}
 }
 
-func (db Database) UpdateSessionAttemptCount(sessionId int, sessionData models.Session) (models.Session, error) {
+func (db Database) UpdateSessionAttemptCount(sessionId string, attempts int) (models.Session, error) {
 	session := models.Session{}
 	query := `UPDATE sessions SET attempts=$1 WHERE id=$2 RETURNING id, attempts, created_at;`
-	err := db.Conn.QueryRow(query, sessionData.Attempts, sessionId).Scan(&session.ID, &session.Attempts, &session.CreatedAt)
+	err := db.Conn.QueryRow(query, attempts, sessionId).Scan(&session.ID, &session.Attempts, &session.CreatedAt)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			return session, ErrNoMatch

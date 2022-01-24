@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/anna-osipova/go-wordle/db"
 	"github.com/anna-osipova/go-wordle/logic"
+	"github.com/anna-osipova/go-wordle/models"
 	"github.com/anna-osipova/go-wordle/service"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt"
@@ -37,9 +39,9 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 	}
 }
 
-func GameRegister(router *gin.RouterGroup) {
+func GameRegister(router *gin.RouterGroup, dbInstance db.Database) {
 	var jwtService service.JWTService = service.JWTAuthService()
-	router.POST("/new", GameNew(jwtService))
+	router.POST("/new", GameNew(jwtService, dbInstance))
 
 	router.Use(AuthorizeJWT(jwtService))
 	router.POST("/start", GameStart)
@@ -93,14 +95,18 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 	}
 }
 
-func GameNew(jwtService service.JWTService) gin.HandlerFunc {
+func GameNew(jwtService service.JWTService, dbInstance db.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var newGame newGamePayload
 		if err := c.ShouldBindJSON(&newGame); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 			return
 		}
-		token := jwtService.GenerateToken(newGame.Word, 0)
+		session := &models.Session{Word: newGame.Word, Attempts: 0}
+		if err := dbInstance.CreateSession(session); err != nil {
+			c.AbortWithStatus(http.StatusInternalServerError)
+		}
+		token := jwtService.GenerateToken(session)
 		c.JSON(http.StatusOK, gin.H{"token": token})
 	}
 }

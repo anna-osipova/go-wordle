@@ -98,6 +98,6 @@ func main() {
 	letters.LettersRegister(lettersGroup)
 
 	gameGroup := v1.Group("/game")
-	game.GameRegister(gameGroup)
+	game.GameRegister(gameGroup, dbInstance)
 	r.Run("localhost:8080")
 }
