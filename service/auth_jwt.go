@@ -17,8 +17,6 @@ type JWTService interface {
 }
 type CustomClaims struct {
 	SessionId string `json:"session_id"`
-	Word      string `json:"word"`
-	Attempts  int    `json:"attempts"`
 	jwt.StandardClaims
 }
 
@@ -49,8 +47,6 @@ func (service *jwtServices) GetSecretKey() string {
 func (service *jwtServices) GenerateToken(session *models.Session) string {
 	claims := &CustomClaims{
 		session.ID,
-		session.Word,
-		session.Attempts,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Hour * 48).Unix(),
 			Issuer:    service.issure,

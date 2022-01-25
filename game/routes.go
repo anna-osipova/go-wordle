@@ -30,8 +30,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 		}
 		if token.Valid {
 			claims := token.Claims.(*service.CustomClaims)
-			c.Set("secret_word", claims.Word)
-			c.Set("attempts", int(claims.Attempts))
+			c.Set("session_id", claims.SessionId)
 		} else {
 			fmt.Println(err)
 			c.AbortWithStatus(http.StatusUnauthorized)
@@ -45,19 +44,23 @@ func GameRegister(router *gin.RouterGroup, dbInstance db.Database) {
 
 	router.Use(AuthorizeJWT(jwtService))
 	router.POST("/start", GameStart)
-	router.POST("/guess/:word", GameGuess(jwtService))
+	router.POST("/guess/:word", GameGuess(jwtService, dbInstance))
 }
 
 type GameGuessResponse struct {
 	Letters []logic.Letter `json:"letters"`
 }
 
-func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
+func GameGuess(jwtService service.JWTService, dbInstance db.Database) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		word := c.MustGet("secret_word").(string)
-		attempts := c.MustGet("attempts").(int)
+		sessionId := c.MustGet("session_id").(string)
+		session, err := dbInstance.GetSessionById(sessionId)
+		if err != nil {
+			c.AbortWithStatus(401)
+		}
+
 		words := c.MustGet("word_list").([]string)
-		if len(word) != 5 {
+		if len(session.Word) != 5 {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
 				"error": "Something went wrong",
 			})
@@ -79,14 +82,15 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 			return
 		}
 
-		if attempts >= 6 {
+		if session.Attempts >= 6 {
 			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
 				"error": "Out of tries",
 			})
 			return
 		}
 
-		letters := logic.MakeGuess(wordGuess, word)
+		letters := logic.MakeGuess(wordGuess, session.Word)
+		dbInstance.UpdateSessionAttemptCount(sessionId, session.Attempts+1)
 
 		gameGuessResponse := GameGuessResponse{
 			Letters: letters,
