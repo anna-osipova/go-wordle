@@ -26,14 +26,22 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 		})
 		if err != nil {
 			fmt.Println(err)
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+				ErrorCode: "INVALID_AUTH_TOKEN",
+				Message:   "Invalid auth token",
+			})
+			return
 		}
 		if token.Valid {
 			claims := token.Claims.(*service.CustomClaims)
 			c.Set("session_id", claims.SessionId)
 		} else {
 			fmt.Println(err)
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorResponse{
+				ErrorCode: "INVALID_AUTH_TOKEN",
+				Message:   "Invalid auth token",
+			})
+			return
 		}
 	}
 }
@@ -56,35 +64,35 @@ func GameGuess(jwtService service.JWTService, dbInstance db.Database) gin.Handle
 		sessionId := c.MustGet("session_id").(string)
 		session, err := dbInstance.GetSessionById(sessionId)
 		if err != nil {
-			c.AbortWithStatus(401)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, models.ErrorResponse{
+				Message:   "Game does not exist",
+				ErrorCode: "INVALID_SESSION",
+			})
+			return
 		}
 
 		words := c.MustGet("word_list").([]string)
 		if len(session.Word) != 5 {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{
-				"error": "Something went wrong",
+			c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
+				Message:   "Game does not exist",
+				ErrorCode: "INVALID_SESSION",
 			})
 			return
 		}
 
 		wordGuess := c.Param("word")
-		if len(wordGuess) != 5 {
-			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{
-				"error": "Guess must be 5 letters long",
-			})
-			return
-		}
-
-		if logic.CheckWordExists(words, wordGuess) == false {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error": "Word does not exist",
+		if len(wordGuess) != 5 || logic.CheckWordExists(words, wordGuess) == false {
+			c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+				Message:   "Word does not exist",
+				ErrorCode: "INVALID_GUESS_WORD",
 			})
 			return
 		}
 
 		if session.Attempts >= 6 {
-			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{
-				"error": "Out of tries",
+			c.AbortWithStatusJSON(http.StatusForbidden, models.ErrorResponse{
+				Message:   "Out of tries",
+				ErrorCode: "NO_TRIES",
 			})
 			return
 		}
@@ -103,12 +111,18 @@ func GameNew(jwtService service.JWTService, dbInstance db.Database) gin.HandlerF
 	return func(c *gin.Context) {
 		var newGame newGamePayload
 		if err := c.ShouldBindJSON(&newGame); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.AbortWithStatusJSON(http.StatusBadRequest, models.ErrorResponse{
+				ErrorCode: "VALIDATION_ERROR",
+				Message:   err.Error(),
+			})
 			return
 		}
 		session := &models.Session{Word: newGame.Word, Attempts: 0}
 		if err := dbInstance.CreateSession(session); err != nil {
-			c.AbortWithStatus(http.StatusInternalServerError)
+			c.AbortWithStatusJSON(http.StatusInternalServerError, models.ErrorResponse{
+				ErrorCode: "DB_ERROR",
+				Message:   err.Error(),
+			})
 		}
 		token := jwtService.GenerateToken(session)
 		c.JSON(http.StatusOK, gin.H{"token": token})
