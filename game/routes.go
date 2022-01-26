@@ -56,7 +56,7 @@ func GameRegister(router *gin.RouterGroup, dbInstance db.Database) {
 }
 
 type GameGuessResponse struct {
-	Letters []logic.Letter `json:"letters"`
+	Letters []models.Letter `json:"letters"`
 }
 
 func GameGuess(jwtService service.JWTService, dbInstance db.Database) gin.HandlerFunc {
@@ -97,8 +97,29 @@ func GameGuess(jwtService service.JWTService, dbInstance db.Database) gin.Handle
 			return
 		}
 
+		processingError := models.ErrorResponse{
+			Message:   "Out of tries",
+			ErrorCode: "NO_TRIES",
+		}
+
 		letters := logic.MakeGuess(wordGuess, session.Word)
-		dbInstance.UpdateSessionAttemptCount(sessionId, session.Attempts+1)
+		_, e := dbInstance.UpdateSessionAttemptCount(sessionId, session.Attempts+1)
+		if e != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, processingError)
+			return
+		}
+		attempt := models.Attempt{
+			SessionId: session.ID,
+			Word:      wordGuess,
+		}
+		dbInstance.CreateAttempt(&attempt)
+		for _, l := range letters {
+			dbInstance.CreateLetter(&models.Letter{
+				AttemptId: attempt.ID,
+				Letter:    l.Letter,
+				Color:     l.Color,
+			})
+		}
 
 		gameGuessResponse := GameGuessResponse{
 			Letters: letters,

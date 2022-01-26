@@ -2,12 +2,9 @@ package logic
 
 import (
 	"strings"
-)
 
-type Letter struct {
-	Letter string `json:"letter"`
-	Color  string `json:"color"`
-}
+	"github.com/anna-osipova/go-wordle/models"
+)
 
 func CheckWordExists(words []string, word string) bool {
 	for _, w := range words {
@@ -18,7 +15,7 @@ func CheckWordExists(words []string, word string) bool {
 	return false
 }
 
-func CountExistingLetters(letters []Letter, letter string) int {
+func CountExistingLetters(letters []models.Letter, letter string) int {
 	count := 0
 	for _, n := range letters {
 		if n.Letter == letter {
@@ -39,8 +36,8 @@ func CountExactMatches(word string, guess_word string, letter string) int {
 	return count
 }
 
-func MakeGuess(wordGuess string, word string) []Letter {
-	letters := make([]Letter, 0)
+func MakeGuess(wordGuess string, word string) []models.Letter {
+	letters := make([]models.Letter, 0)
 	for i, r := range wordGuess {
 		letter := string(r)
 		index := strings.Index(word, letter)
@@ -55,7 +52,7 @@ func MakeGuess(wordGuess string, word string) []Letter {
 		} else {
 			color = "grey"
 		}
-		letters = append(letters, Letter{
+		letters = append(letters, models.Letter{
 			Color:  color,
 			Letter: letter,
 		})
