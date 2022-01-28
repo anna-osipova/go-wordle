@@ -1,23 +1,21 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
-	_ "github.com/lib/pq"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
-// ErrNoMatch is returned when we request a row that doesn't exist
-var ErrNoMatch = fmt.Errorf("no matching record")
-
 type Database struct {
-	Conn *sql.DB
+	*gorm.DB
 }
 
-func Initialize() (Database, error) {
-	db := Database{}
+var DB *gorm.DB
+
+// Opening a database and save the reference to `Database` struct.
+func Init() *gorm.DB {
 	username := os.Getenv("POSTGRES_USER")
 	password := os.Getenv("POSTGRES_PASSWORD")
 	database := os.Getenv("POSTGRES_DB")
@@ -25,15 +23,15 @@ func Initialize() (Database, error) {
 	port := os.Getenv("POSTGRES_PORT")
 	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
 		host, port, username, password, database)
-	conn, err := sql.Open("postgres", dsn)
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		return db, err
+		fmt.Println("db err: (Init) ", err)
 	}
-	db.Conn = conn
-	err = db.Conn.Ping()
-	if err != nil {
-		return db, err
-	}
-	log.Println("Database connection established")
-	return db, nil
+	DB = db
+	return DB
+}
+
+// Using this function to get a connection, you can create your connection pool here.
+func GetDB() *gorm.DB {
+	return DB
 }

@@ -1,4 +1,4 @@
-package models
+package common
 
 type ErrorResponse struct {
 	ErrorCode string `json:"error_code"`

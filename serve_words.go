@@ -54,11 +54,13 @@ func GetRandomWord(words []string) string {
 func main() {
 	godotenv.Load()
 
-	dbInstance, err := db.Initialize()
+	dbInstance := db.Init()
+	// Migrate(db)
+	dbConn, err := dbInstance.DB()
+	defer dbConn.Close()
 	if err != nil {
-		panic(fmt.Sprintf("Could not set up database: %v", err))
+		panic(fmt.Sprintf("Error connecting to DB: %s", err))
 	}
-	defer dbInstance.Conn.Close()
 
 	r := gin.Default()
 
@@ -98,6 +100,6 @@ func main() {
 	letters.LettersRegister(lettersGroup)
 
 	gameGroup := v1.Group("/game")
-	game.GameRegister(gameGroup, dbInstance)
+	game.GameRegister(gameGroup)
 	r.Run("localhost:8080")
 }

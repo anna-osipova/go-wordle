@@ -5,13 +5,12 @@ import (
 	"os"
 	"time"
 
-	"github.com/anna-osipova/go-wordle/models"
 	"github.com/golang-jwt/jwt"
 )
 
 //jwt service
 type JWTService interface {
-	GenerateToken(session *models.Session) string
+	GenerateToken(session *Session) string
 	ValidateToken(token string) (*jwt.Token, error)
 	GetSecretKey() string
 }
@@ -44,7 +43,7 @@ func (service *jwtServices) GetSecretKey() string {
 	return service.secretKey
 }
 
-func (service *jwtServices) GenerateToken(session *models.Session) string {
+func (service *jwtServices) GenerateToken(session *Session) string {
 	claims := &CustomClaims{
 		session.ID,
 		jwt.StandardClaims{
