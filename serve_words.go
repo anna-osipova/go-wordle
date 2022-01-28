@@ -13,6 +13,7 @@ import (
 	"github.com/anna-osipova/go-wordle/game"
 	"github.com/anna-osipova/go-wordle/hint"
 	"github.com/anna-osipova/go-wordle/letters"
+	"github.com/anna-osipova/go-wordle/service"
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -55,7 +56,8 @@ func main() {
 	godotenv.Load()
 
 	dbInstance := db.Init()
-	// Migrate(db)
+	game.AutoMigrate()
+	service.AutoMigrate()
 	dbConn, err := dbInstance.DB()
 	defer dbConn.Close()
 	if err != nil {

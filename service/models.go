@@ -10,6 +10,12 @@ type Session struct {
 	Attempts int    `gorm:"attempts"`
 }
 
+func AutoMigrate() {
+	dbInstance := db.GetDB()
+
+	dbInstance.AutoMigrate(&Session{})
+}
+
 func GetSessionById(sessionId string) (Session, error) {
 	var sessionModel Session
 	dbInstance := db.GetDB()

@@ -19,6 +19,13 @@ type Letter struct {
 	Attempt   Attempt `gorm:"foreignKey:AttemptID;references:ID" json:"-"`
 }
 
+func AutoMigrate() {
+	dbInstance := db.GetDB()
+
+	dbInstance.AutoMigrate(&Attempt{})
+	dbInstance.AutoMigrate(&Letter{})
+}
+
 func CreateAttempt(attempt *Attempt) error {
 	dbInstance := db.GetDB()
 
