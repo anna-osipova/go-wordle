@@ -5,9 +5,8 @@ import (
 )
 
 type Session struct {
-	ID       string `gorm:"primaryKey;default:uuid_generate_v4()"`
-	Word     string `gorm:"word"`
-	Attempts int    `gorm:"attempts"`
+	ID   string `gorm:"primaryKey;default:uuid_generate_v4()"`
+	Word string `gorm:"word"`
 }
 
 func AutoMigrate() {

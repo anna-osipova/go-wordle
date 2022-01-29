@@ -35,3 +35,11 @@ func CreateAttempt(attempt *Attempt) error {
 	}
 	return nil
 }
+
+func GetAttempts(sessionId string) ([]Attempt, error) {
+	var attempts []Attempt
+	dbInstance := db.GetDB()
+
+	result := dbInstance.Where(&Attempt{SessionId: sessionId}).Find(&attempts)
+	return attempts, result.Error
+}

@@ -60,6 +60,11 @@ type GameGuessResponse struct {
 func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
+		processingError := common.ErrorResponse{
+			Message:   "Some issue",
+			ErrorCode: "ERROR",
+		}
+
 		sessionId := c.MustGet("session_id").(string)
 		session, err := service.GetSessionById(sessionId)
 		if err != nil {
@@ -88,7 +93,12 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 			return
 		}
 
-		if session.Attempts >= 6 {
+		attempts, err := GetAttempts(session.ID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, processingError)
+			return
+		}
+		if len(attempts) >= 6 {
 			c.AbortWithStatusJSON(http.StatusForbidden, common.ErrorResponse{
 				Message:   "Out of tries",
 				ErrorCode: "NO_TRIES",
@@ -96,17 +106,7 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 			return
 		}
 
-		processingError := common.ErrorResponse{
-			Message:   "Some issue",
-			ErrorCode: "ERROR",
-		}
-
 		letters := MakeGuess(wordGuess, session.Word)
-		// _, err = dbInstance.UpdateSessionAttemptCount(sessionId, session.Attempts+1)
-		if err != nil {
-			c.AbortWithStatusJSON(http.StatusInternalServerError, processingError)
-			return
-		}
 
 		attempt := Attempt{
 			SessionId: session.ID,
@@ -136,7 +136,7 @@ func GameNew(jwtService service.JWTService) gin.HandlerFunc {
 			})
 			return
 		}
-		session := &service.Session{Word: newGame.Word, Attempts: 0}
+		session := &service.Session{Word: newGame.Word}
 		if err := service.CreateSession(session); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, common.ErrorResponse{
 				ErrorCode: "DB_ERROR",
