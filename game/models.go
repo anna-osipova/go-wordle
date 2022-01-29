@@ -15,6 +15,7 @@ type Letter struct {
 	ID        uint    `gorm:"primaryKey" json:"-"`
 	Letter    string  `json:"letter"`
 	Color     string  `json:"color"`
+	Order     int     `json:"-"`
 	AttemptID uint    `json:"-"`
 	Attempt   Attempt `gorm:"foreignKey:AttemptID;references:ID" json:"-"`
 }

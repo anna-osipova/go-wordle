@@ -53,6 +53,7 @@ func MakeGuess(wordGuess string, word string) []Letter {
 		letters = append(letters, Letter{
 			Color:  color,
 			Letter: letter,
+			Order:  i,
 		})
 	}
 	return letters
