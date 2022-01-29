@@ -49,7 +49,7 @@ func GameRegister(router *gin.RouterGroup) {
 	router.POST("/new", GameNew(jwtService))
 
 	router.Use(AuthorizeJWT(jwtService))
-	router.POST("/start", GameStart)
+	router.GET("/status", GameStatus(jwtService))
 	router.POST("/guess/:word", GameGuess(jwtService))
 }
 
@@ -149,6 +149,30 @@ func GameNew(jwtService service.JWTService) gin.HandlerFunc {
 	}
 }
 
-func GameStart(c *gin.Context) {
-	c.Status(http.StatusOK)
+func GameStatus(jwtService service.JWTService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var err error
+		processingError := common.ErrorResponse{
+			Message:   "Some issue",
+			ErrorCode: "ERROR",
+		}
+
+		sessionId := c.MustGet("session_id").(string)
+		session, err := service.GetSessionById(sessionId)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusUnauthorized, common.ErrorResponse{
+				Message:   "Game does not exist",
+				ErrorCode: "INVALID_SESSION",
+			})
+			return
+		}
+
+		attempts, err := GetAttempts(session.ID)
+		if err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, processingError)
+			return
+		}
+
+		c.JSON(http.StatusOK, gin.H{"attempts": attempts})
+	}
 }
