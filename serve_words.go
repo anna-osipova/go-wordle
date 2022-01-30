@@ -103,5 +103,5 @@ func main() {
 
 	gameGroup := v1.Group("/game")
 	game.GameRegister(gameGroup)
-	r.Run("localhost:8080")
+	r.Run()
 }
