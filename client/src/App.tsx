@@ -51,15 +51,16 @@ function App() {
   const makeGuess = async (word: string): Promise<boolean> => {
     const [data, error] = await makeGuessRequest(word);
     if (error) {
+      alert(error.message);
       return false;
     }
     if (data) {
+      setAttempts([...attempts, { word, letters: data.letters }]);
       const hasWon = data.letters.every((l) => l.color === 'green');
       if (hasWon) {
         alert('you won');
         resetGame();
       } else {
-        setAttempts([...attempts, { word, letters: data.letters }]);
         data.letters.forEach((letter) => {
           keyboardRef.current?.addButtonTheme(letter.letter, `color-${letter.color}`);
         });

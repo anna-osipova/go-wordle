@@ -3,7 +3,8 @@ import { Letter } from '../types';
 const URL = 'http://localhost:8080/api';
 
 type ErrorResponse = {
-  error: string;
+  error_code: string;
+  message: string;
 };
 
 type GuessSuccessResponse = {
@@ -14,7 +15,7 @@ type GuessSuccessResponse = {
 type GuessResponse = ErrorResponse | GuessSuccessResponse;
 
 const responseIsError = (response: GuessResponse): response is ErrorResponse => {
-  return 'error' in response;
+  return 'error_code' in response;
 };
 
 const getToken = () => {
