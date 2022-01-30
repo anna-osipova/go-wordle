@@ -21,14 +21,14 @@ code {
   text-transform: uppercase;
 }
 
+.color-grey {
+  background-color: #808080 !important;
+}
+
 .color-yellow {
   background-color: #ffef00 !important;
 }
 
 .color-green {
   background-color: #1fff00 !important;
-}
-
-.color-grey {
-  background-color: #808080 !important;
 }
