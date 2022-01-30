@@ -4,7 +4,7 @@ import 'react-simple-keyboard/build/css/index.css';
 import * as React from 'react';
 import Keyboard from 'react-simple-keyboard';
 
-import { makeGuessRequest, makeNewRandomGameRequest, makeStartRequest } from './api';
+import { makeGuessRequest, makeNewRandomGameRequest, makeStatusRequest } from './api';
 import { LetterGrid } from './components/LetterGrid';
 import { Attempt, WORD_LENGTH } from './types';
 
@@ -19,7 +19,12 @@ function App() {
   const keyboardRef = React.useRef<SimpleKeyboard | null>(null);
 
   React.useEffect(() => {
-    makeStartRequest();
+    (async () => {
+      const [data] = await makeStatusRequest();
+      if (data) {
+        setAttempts(data.attempts);
+      }
+    })();
   }, []);
 
   const onKeyPress = async (key: string) => {
@@ -55,7 +60,7 @@ function App() {
       return false;
     }
     if (data) {
-      setAttempts([...attempts, { word, letters: data.letters }]);
+      setAttempts([...attempts, { word_guess: word, letters: data.letters }]);
       const hasWon = data.letters.every((l) => l.color === 'green');
       if (hasWon) {
         alert('you won');

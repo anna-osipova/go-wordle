@@ -1,4 +1,4 @@
-import { Letter } from '../types';
+import { Attempt, Letter } from '../types';
 
 const URL = 'http://localhost:8080/api';
 
@@ -10,6 +10,10 @@ type ErrorResponse = {
 type GuessSuccessResponse = {
   token: string;
   letters: [Letter, Letter, Letter, Letter, Letter];
+};
+
+type StatusResponse = {
+  attempts: Attempt[];
 };
 
 type TokenResponse = {
@@ -48,14 +52,24 @@ export const makeGuessRequest = async (
   return [data, null];
 };
 
-export const makeStartRequest = async (): Promise<void> => {
-  await fetch(`${URL}/game/start`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: {
-      Authorization: `Bearer ${getToken()}`
+export const makeStatusRequest = async (): Promise<
+  [StatusResponse, null] | [null, ErrorResponse]
+> => {
+  try {
+    const response = await fetch(`${URL}/game/status`, {
+      credentials: 'include',
+      headers: {
+        Authorization: `Bearer ${getToken()}`
+      }
+    });
+    const data = await response.json();
+    if (responseIsError(data)) {
+      return [null, data];
     }
-  });
+    return [data, null];
+  } catch (err) {
+    return [null, { error_code: 'FETCH_ERROR', message: 'Error fetching' }];
+  }
 };
 
 export const makeNewRandomGameRequest = async (): Promise<

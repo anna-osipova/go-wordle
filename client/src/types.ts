@@ -9,6 +9,6 @@ export type Letter = {
 };
 
 export type Attempt = {
-  word: string;
+  word_guess: string;
   letters: [Letter, Letter, Letter, Letter, Letter];
 };
