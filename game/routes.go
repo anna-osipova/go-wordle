@@ -2,7 +2,9 @@ package game
 
 import (
 	"fmt"
+	"math/rand"
 	"net/http"
+	"time"
 
 	"github.com/anna-osipova/go-wordle/common"
 	"github.com/anna-osipova/go-wordle/service"
@@ -47,6 +49,7 @@ func AuthorizeJWT(jwtService service.JWTService) gin.HandlerFunc {
 func GameRegister(router *gin.RouterGroup) {
 	var jwtService service.JWTService = service.JWTAuthService()
 	router.POST("/new", GameNew(jwtService))
+	router.GET("/new/random", GameNewRandom(jwtService))
 
 	router.Use(AuthorizeJWT(jwtService))
 	router.GET("/status", GameStatus(jwtService))
@@ -137,6 +140,27 @@ func GameNew(jwtService service.JWTService) gin.HandlerFunc {
 			return
 		}
 		session := &service.Session{Word: newGame.Word}
+		if err := service.CreateSession(session); err != nil {
+			c.AbortWithStatusJSON(http.StatusInternalServerError, common.ErrorResponse{
+				ErrorCode: "DB_ERROR",
+				Message:   err.Error(),
+			})
+			return
+		}
+		token := jwtService.GenerateToken(session)
+		c.JSON(http.StatusOK, gin.H{"token": token})
+	}
+}
+
+func GameNewRandom(jwtService service.JWTService) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		words := c.MustGet("word_list").([]string)
+		wordsCount := len(words)
+
+		source := rand.NewSource(time.Now().UnixNano())
+		random := rand.New(source)
+		word := words[random.Intn(wordsCount)]
+		session := &service.Session{Word: word}
 		if err := service.CreateSession(session); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, common.ErrorResponse{
 				ErrorCode: "DB_ERROR",

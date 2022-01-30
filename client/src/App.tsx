@@ -4,7 +4,7 @@ import 'react-simple-keyboard/build/css/index.css';
 import * as React from 'react';
 import Keyboard from 'react-simple-keyboard';
 
-import { makeGuessRequest, makeStartRequest } from './api';
+import { makeGuessRequest, makeNewRandomGameRequest, makeStartRequest } from './api';
 import { LetterGrid } from './components/LetterGrid';
 import { Attempt, WORD_LENGTH } from './types';
 
@@ -69,6 +69,19 @@ function App() {
     return true;
   };
 
+  const onRandomClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    const [data, error] = await makeNewRandomGameRequest();
+    if (error) {
+      alert(error.message);
+      return;
+    }
+    if (data) {
+      const currentUrl = window.location.href.split('?')[0];
+      window.location.href = `${currentUrl}?token=${data.token}`;
+    }
+  };
+
   const resetGame = () => {
     // TODO: show emoji stats
     setAttempts([]);
@@ -91,6 +104,11 @@ function App() {
           default: ['q w e r t y u i o p', 'a s d f g h j k l', '{enter} z x c v b n m {bksp}']
         }}
       />
+      <div className="button-random">
+        <a href="#" className="button" onClick={onRandomClick}>
+          Random
+        </a>
+      </div>
     </div>
   );
 }

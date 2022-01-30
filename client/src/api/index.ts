@@ -12,6 +12,10 @@ type GuessSuccessResponse = {
   letters: [Letter, Letter, Letter, Letter, Letter];
 };
 
+type TokenResponse = {
+  token: string;
+};
+
 type GuessResponse = ErrorResponse | GuessSuccessResponse;
 
 const responseIsError = (response: GuessResponse): response is ErrorResponse => {
@@ -52,4 +56,15 @@ export const makeStartRequest = async (): Promise<void> => {
       Authorization: `Bearer ${getToken()}`
     }
   });
+};
+
+export const makeNewRandomGameRequest = async (): Promise<
+  [TokenResponse, null] | [null, ErrorResponse]
+> => {
+  const response = await fetch(`${URL}/game/new/random`);
+  const data = await response.json();
+  if (responseIsError(data)) {
+    return [null, data];
+  }
+  return [data, null];
 };

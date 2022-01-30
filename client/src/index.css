@@ -32,3 +32,10 @@ code {
 .color-green {
   background-color: #1fff00 !important;
 }
+
+.button {
+  border: 1px solid #61dafb;
+  border-radius: 3px;
+  color: #61dafb;
+  padding: 5px;
+}
