@@ -48,5 +48,6 @@
     "@typescript-eslint/parser": "^5.10.0",
     "eslint-plugin-prettier": "^4.0.0",
     "eslint-plugin-simple-import-sort": "^7.0.0"
-  }
+  },
+  "proxy": "http://localhost:8080"
 }

@@ -1,6 +1,6 @@
 import { Attempt, Letter } from '../types';
 
-const URL = 'http://localhost:8080/api';
+const URL = '/api';
 
 type ErrorResponse = {
   error_code: string;
