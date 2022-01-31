@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"math/rand"
+	"net/http"
 	"os"
 	"time"
 
@@ -65,6 +66,11 @@ func main() {
 	}
 
 	r := gin.Default()
+	r.LoadHTMLFiles("client/build/index.html")
+	r.Static("/static", "./client/build/static")
+	r.Static("/assets", "./client/build/assets")
+	r.StaticFile("/manifest.json", "./client/build/manifest.json")
+	r.StaticFile("/robots.txt", "./client/build/robots.txt")
 
 	config := cors.DefaultConfig()
 	config.AllowOrigins = []string{"http://localhost:3000"}
@@ -73,6 +79,10 @@ func main() {
 	r.Use(cors.New(config))
 
 	r.Use(WordsMiddleware)
+
+	r.GET("/", func(c *gin.Context) {
+		c.HTML(http.StatusOK, "index.html", nil)
+	})
 
 	r.GET("/words", func(c *gin.Context) {
 		words := c.MustGet("word_list").([]string)
