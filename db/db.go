@@ -41,6 +41,7 @@ func Init() *gorm.DB {
 	if err != nil {
 		fmt.Println("db err: (Init) ", err)
 	}
+	db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"")
 	DB = db
 	return DB
 }
