@@ -84,7 +84,10 @@ func main() {
 		c.HTML(http.StatusOK, "index.html", nil)
 	})
 
-	r.GET("/words", func(c *gin.Context) {
+	v1 := r.Group("/api")
+	v1.Use(WordsMiddleware)
+
+	v1.GET("/words", func(c *gin.Context) {
 		words := c.MustGet("word_list").([]string)
 		wordsResponse := WordsResponse{
 			Count: len(words),
@@ -92,18 +95,6 @@ func main() {
 		}
 		c.JSON(200, wordsResponse)
 	})
-
-	r.GET("/words/random", func(c *gin.Context) {
-		words := c.MustGet("word_list").([]string)
-
-		wordResponse := WordResponse{
-			Word: GetRandomWord(words),
-		}
-		c.JSON(200, wordResponse)
-	})
-
-	v1 := r.Group("/api")
-	v1.Use(WordsMiddleware)
 
 	hintGroup := v1.Group("/hint")
 	hint.HintRegister(hintGroup)
@@ -114,9 +105,9 @@ func main() {
 	gameGroup := v1.Group("/game")
 	game.GameRegister(gameGroup)
 
-	host := ":"
 	if os.Getenv("USE_LOCALHOST") == "true" {
-		host = "localhost:"
+		r.Run("localhost:" + os.Getenv("PORT"))
+	} else {
+		r.Run()
 	}
-	r.Run(host + os.Getenv("PORT"))
 }
