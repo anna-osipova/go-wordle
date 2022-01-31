@@ -113,5 +113,10 @@ func main() {
 
 	gameGroup := v1.Group("/game")
 	game.GameRegister(gameGroup)
-	r.Run()
+
+	host := ":"
+	if os.Getenv("USE_LOCALHOST") == "true" {
+		host = "localhost:"
+	}
+	r.Run(host + os.Getenv("PORT"))
 }
