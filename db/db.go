@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 
+	_ "github.com/GoogleCloudPlatform/cloudsql-proxy/proxy/dialers/postgres"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
@@ -21,9 +22,22 @@ func Init() *gorm.DB {
 	database := os.Getenv("POSTGRES_DB")
 	host := os.Getenv("POSTGRES_HOST")
 	port := os.Getenv("POSTGRES_PORT")
-	dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		host, port, username, password, database)
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
+	var err error
+	var db *gorm.DB
+	if os.Getenv("USE_LOCALHOST") == "true" {
+		dsn := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+			host, port, username, password, database)
+		db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	} else {
+		dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s sslmode=disable",
+			host, username, password, database)
+		db, err = gorm.Open(postgres.New(postgres.Config{
+			DriverName: "cloudsqlpostgres",
+			DSN:        dsn,
+		}))
+	}
+
 	if err != nil {
 		fmt.Println("db err: (Init) ", err)
 	}
