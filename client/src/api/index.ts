@@ -82,3 +82,17 @@ export const makeNewRandomGameRequest = async (): Promise<
   }
   return [data, null];
 };
+
+export const makeNewGameRequest = async (
+  word: string
+): Promise<[TokenResponse, null] | [null, ErrorResponse]> => {
+  const response = await fetch(`${URL}/game/new`, {
+    method: 'POST',
+    body: JSON.stringify({ word })
+  });
+  const data = await response.json();
+  if (responseIsError(data)) {
+    return [null, data];
+  }
+  return [data, null];
+};

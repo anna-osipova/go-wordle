@@ -1,0 +1,23 @@
+.word-input {
+  border-radius: 5px;
+  font-size: 16px;
+  margin: 20px 5px;
+  padding: 5px;
+}
+
+.word-submit {
+  background-color: honeydew;
+  font-size: 16px;
+  margin: 20px 5px;
+  padding: 5px;
+}
+
+.word-error {
+  color: red
+}
+
+.token-input {
+  font-size: 14px;
+  margin: 10px 0;
+  width: 100%;
+}
