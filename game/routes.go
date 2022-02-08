@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/anna-osipova/go-wordle/common"
@@ -141,14 +142,15 @@ func GameNew(jwtService service.JWTService) gin.HandlerFunc {
 		}
 
 		words := c.MustGet("word_list").([]string)
-		if len(newGame.Word) != 5 || CheckWordExists(words, newGame.Word) == false {
+		word := strings.ToLower(newGame.Word)
+		if len(word) != 5 || CheckWordExists(words, word) == false {
 			c.AbortWithStatusJSON(http.StatusBadRequest, common.ErrorResponse{
 				Message:   "Word does not exist",
 				ErrorCode: "INVALID_GUESS_WORD",
 			})
 			return
 		}
-		session := &service.Session{Word: newGame.Word}
+		session := &service.Session{Word: word}
 		if err := service.CreateSession(session); err != nil {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, common.ErrorResponse{
 				ErrorCode: "DB_ERROR",
