@@ -21,6 +21,7 @@ export const Game = () => {
       const [data] = await makeStatusRequest();
       if (data) {
         setAttempts(data.attempts);
+        data.attempts.forEach(colorKeyboard);
       }
     })();
   }, []);
@@ -64,12 +65,16 @@ export const Game = () => {
         alert('you won');
         resetGame();
       } else {
-        data.letters.forEach((letter) => {
-          keyboardRef.current?.addButtonTheme(letter.letter, `color-${letter.color}`);
-        });
+        colorKeyboard(data);
       }
     }
     return true;
+  };
+
+  const colorKeyboard = (attempt: Pick<Attempt, 'letters'>) => {
+    attempt.letters.forEach((letter) => {
+      keyboardRef.current?.addButtonTheme(letter.letter, `color-${letter.color}`);
+    });
   };
 
   const onRandomClick = async (e: React.MouseEvent) => {
