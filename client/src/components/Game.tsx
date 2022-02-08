@@ -1,5 +1,6 @@
 import 'react-simple-keyboard/build/css/index.css';
 
+import { Fireworks } from 'fireworks/lib/react';
 import * as React from 'react';
 import Keyboard from 'react-simple-keyboard';
 
@@ -14,6 +15,7 @@ type SimpleKeyboard = {
 export const Game = () => {
   const [input, setInput] = React.useState<string>('');
   const [attempts, setAttempts] = React.useState<Attempt[]>([]);
+  const [hasWon, setHasWon] = React.useState<boolean>(false);
   const keyboardRef = React.useRef<SimpleKeyboard | null>(null);
 
   React.useEffect(() => {
@@ -61,12 +63,10 @@ export const Game = () => {
     if (data) {
       setAttempts([...attempts, { word_guess: word, letters: data.letters }]);
       const hasWon = data.letters.every((l) => l.color === 'green');
-      if (hasWon) {
-        alert('you won');
-        resetGame();
-      } else {
+      setTimeout(() => {
+        hasWon && setHasWon(true);
         colorKeyboard(data);
-      }
+      }, 2000);
     }
     return true;
   };
@@ -90,8 +90,8 @@ export const Game = () => {
     }
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const resetGame = () => {
-    // TODO: show emoji stats
     setAttempts([]);
     keyboardRef.current?.removeButtonTheme(
       'q w e r t y u i o p a s d f g h j k l z x c v b n m',
@@ -101,6 +101,7 @@ export const Game = () => {
 
   return (
     <>
+      {hasWon && <Fireworks count={3} />}
       <LetterGrid attempts={attempts} input={input} />
       <Keyboard
         keyboardRef={(ref: SimpleKeyboard) => (keyboardRef.current = ref)}
