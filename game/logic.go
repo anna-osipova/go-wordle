@@ -58,3 +58,12 @@ func MakeGuess(wordGuess string, word string) []Letter {
 	}
 	return letters
 }
+
+func HasMadeSameAttempt(attempts []Attempt, wordGuess string) bool {
+	for _, attemp := range attempts {
+		if attemp.WordGuess == wordGuess {
+			return true
+		}
+	}
+	return false
+}

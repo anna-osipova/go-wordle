@@ -57,6 +57,8 @@ func GameRegister(router *gin.RouterGroup) {
 	router.POST("/guess/:word", GameGuess(jwtService))
 }
 
+const MAX_ATTEMPTS = 6
+
 type GameGuessResponse struct {
 	Letters []Letter `json:"letters"`
 }
@@ -102,7 +104,15 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, processingError)
 			return
 		}
-		if len(attempts) >= 6 {
+		if HasMadeSameAttempt(attempts, wordGuess) {
+			c.AbortWithStatusJSON(http.StatusBadRequest, common.ErrorResponse{
+				Message:   "Same word has already been attempted",
+				ErrorCode: "DUPLICATE_ATTEMPT",
+			})
+			return
+		}
+
+		if len(attempts) >= MAX_ATTEMPTS {
 			c.AbortWithStatusJSON(http.StatusForbidden, common.ErrorResponse{
 				Message:   "Out of tries",
 				ErrorCode: "NO_TRIES",
