@@ -1,5 +1,6 @@
 body {
   margin: 0;
+  padding: 10px 10px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
@@ -13,12 +14,44 @@ code {
 }
 
 .simple-keyboard {
-  max-width: 500px;
+  max-width: 360px;
   margin: 0 auto;
+  position: relative;
+}
+
+.simple-keyboard .hg-row {
+  display: flex;
+  justify-content: center;
 }
 
 .simple-keyboard .hg-button {
   text-transform: uppercase;
+  height: 44px;
+  width: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-grow: unset;
+}
+
+.simple-keyboard .hg-button-container {
+  position: absolute;
+  right: 15px;
+  height: 50px;
+}
+
+.simple-keyboard .hg-row:nth-child(1){
+  margin-left: 5px;
+  margin-right: 5px;
+}
+
+.simple-keyboard .hg-row:nth-child(2){
+  margin-left: 24px;
+  margin-right: 24px;
+}
+
+.simple-keyboard .hg-row:nth-child(2) .hg-button-container {
+  align-items: flex-end;
 }
 
 :root {
