@@ -15,6 +15,7 @@ type GuessSuccessResponse = {
 
 type StatusResponse = {
   attempts: Attempt[];
+  word?: string;
 };
 
 type TokenResponse = {

@@ -59,7 +59,7 @@ func GameRegister(router *gin.RouterGroup) {
 
 const MAX_ATTEMPTS = 6
 
-type GameGuessResponse struct {
+type gameGuessResponse struct {
 	Letters []Letter `json:"letters"`
 	Word    string   `json:"word,omitempty"`
 }
@@ -134,13 +134,13 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 			return
 		}
 
-		gameGuessResponse := GameGuessResponse{
+		guessResponse := gameGuessResponse{
 			Letters: letters,
 		}
 		if len(attempts) == MAX_ATTEMPTS-1 {
-			gameGuessResponse.Word = session.Word
+			guessResponse.Word = session.Word
 		}
-		c.JSON(200, gameGuessResponse)
+		c.JSON(http.StatusOK, guessResponse)
 	}
 }
 
@@ -198,6 +198,11 @@ func GameNewRandom(jwtService service.JWTService) gin.HandlerFunc {
 	}
 }
 
+type gameStatusResponse struct {
+	Attempts []Attempt `json:"attempts"`
+	Word     string    `json:"word,omitempty"`
+}
+
 func GameStatus(jwtService service.JWTService) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
@@ -222,6 +227,13 @@ func GameStatus(jwtService service.JWTService) gin.HandlerFunc {
 			return
 		}
 
-		c.JSON(http.StatusOK, gin.H{"attempts": attempts})
+		response := gameStatusResponse{
+			Attempts: attempts,
+		}
+		if len(attempts) == MAX_ATTEMPTS {
+			response.Word = session.Word
+		}
+
+		c.JSON(http.StatusOK, response)
 	}
 }

@@ -32,6 +32,10 @@ export const Game = () => {
       if (data) {
         setAttempts(data.attempts);
         data.attempts.forEach(colorKeyboard);
+        if (data.attempts.length === MAX_ATTEMPTS && data.word) {
+          setCorrectWord(data.word);
+          setGameState(GameState.Lost);
+        }
       }
     })();
   }, []);
