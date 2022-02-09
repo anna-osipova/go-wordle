@@ -10,6 +10,7 @@ type ErrorResponse = {
 type GuessSuccessResponse = {
   token: string;
   letters: [Letter, Letter, Letter, Letter, Letter];
+  word?: string;
 };
 
 type StatusResponse = {

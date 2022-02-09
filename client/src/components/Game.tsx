@@ -5,17 +5,25 @@ import * as React from 'react';
 import Keyboard from 'react-simple-keyboard';
 
 import { makeGuessRequest, makeNewRandomGameRequest, makeStatusRequest } from '../api';
-import { Attempt, WORD_LENGTH } from '../types';
+import { Attempt, MAX_ATTEMPTS, WORD_LENGTH } from '../types';
 import { LetterGrid } from './LetterGrid';
+
 type SimpleKeyboard = {
   addButtonTheme: (buttons: string, classes: string) => void;
   removeButtonTheme: (buttons: string, classes: string) => void;
 };
 
+enum GameState {
+  InProgress,
+  Won,
+  Lost
+}
+
 export const Game = () => {
   const [input, setInput] = React.useState<string>('');
   const [attempts, setAttempts] = React.useState<Attempt[]>([]);
-  const [hasWon, setHasWon] = React.useState<boolean>(false);
+  const [correctWord, setCorrectWord] = React.useState<string | null>(null);
+  const [gameState, setGameState] = React.useState<GameState>(GameState.InProgress);
   const keyboardRef = React.useRef<SimpleKeyboard | null>(null);
 
   React.useEffect(() => {
@@ -61,10 +69,13 @@ export const Game = () => {
       return false;
     }
     if (data) {
-      setAttempts([...attempts, { word_guess: word, letters: data.letters }]);
       const hasWon = data.letters.every((l) => l.color === 'green');
+      const hasLost = attempts.length === MAX_ATTEMPTS - 1 && !hasWon;
+      setAttempts([...attempts, { word_guess: word, letters: data.letters }]);
+      setCorrectWord(data.word ?? null);
       setTimeout(() => {
-        hasWon && setHasWon(true);
+        hasWon && setGameState(GameState.Won);
+        hasLost && setGameState(GameState.Lost);
         colorKeyboard(data);
       }, 2000);
     }
@@ -101,7 +112,7 @@ export const Game = () => {
 
   return (
     <>
-      {hasWon && <Fireworks count={3} />}
+      {gameState === GameState.Won && <Fireworks count={3} />}
       <LetterGrid attempts={attempts} input={input} />
       <Keyboard
         keyboardRef={(ref: SimpleKeyboard) => (keyboardRef.current = ref)}
@@ -113,6 +124,11 @@ export const Game = () => {
           default: ['q w e r t y u i o p', 'a s d f g h j k l', '{enter} z x c v b n m {bksp}']
         }}
       />
+      {gameState === GameState.Lost && (
+        <div className="correct-word">
+          <span>Correct word was "{correctWord}"</span>
+        </div>
+      )}
       <div className="button-random">
         <a href="#" className="button" onClick={onRandomClick}>
           Random

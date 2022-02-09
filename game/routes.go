@@ -61,6 +61,7 @@ const MAX_ATTEMPTS = 6
 
 type GameGuessResponse struct {
 	Letters []Letter `json:"letters"`
+	Word    string   `json:"word,omitempty"`
 }
 
 func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
@@ -135,6 +136,9 @@ func GameGuess(jwtService service.JWTService) gin.HandlerFunc {
 
 		gameGuessResponse := GameGuessResponse{
 			Letters: letters,
+		}
+		if len(attempts) == MAX_ATTEMPTS-1 {
+			gameGuessResponse.Word = session.Word
 		}
 		c.JSON(200, gameGuessResponse)
 	}
